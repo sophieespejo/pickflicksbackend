@@ -7,6 +7,6 @@ namespace pickflicksbackend.Models.DTO
 {
     public class PasswordDTO
     {
-        
+        // Empty for some reason
     }
 }
