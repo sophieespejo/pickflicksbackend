@@ -11,6 +11,7 @@ namespace pickflicksbackend.Services.Context
     {
         public DbSet<UserModel> UserInfo { get; set;}
         public DbSet<MWGModel> MWGInfo { get; set; }
+        public DbSet<GenreRankingModel> GenreRankingInfo {get; set;}
         public DataContext(DbContextOptions options ): base(options)
         { }
         protected override void OnModelCreating(ModelBuilder builder)
