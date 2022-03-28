@@ -133,7 +133,7 @@ namespace pickflicksbackend.Services
         public List<UserDTO> GetAllUsers()
         {
             List<UserModel> AllUser = new List<UserModel>();
-            AllUser= _context.UserInfo.ToList();
+            AllUser = _context.UserInfo.ToList();
             List<UserDTO>PublicDataAllUser = new List<UserDTO>();
             foreach (UserModel User in AllUser)
             {

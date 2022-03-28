@@ -83,14 +83,15 @@ namespace pickflicksbackend.Services
             return result;        
         }
 
-        public bool AddMemberToMWG(int MWGId, it? newMemberId)
+        // Hopefully this works
+        public bool AddMemberToMWG(int MWGId, int newMemberId)
         {
             bool result=false;
             MWGModel foundMWG = GetMWGById(MWGId);
             if(foundMWG != null)
             {
                 // Append the new userId into the string
-                foundMWG.MembersId += newMemberId;
+                foundMWG.MembersId += newMemberId + ',';
                 _context.Update<MWGModel>(foundMWG);
                 result = _context.SaveChanges()!=0;
             }
@@ -104,34 +105,34 @@ namespace pickflicksbackend.Services
             if(foundMWG != null)
             {
                 // Append the new userId into the string
-                foundMWG.MWGName += updatedMWGName;
+                foundMWG.UserSuggestedMovies += newMovie + ',';
                 _context.Update<MWGModel>(foundMWG);
                 result = _context.SaveChanges()!=0;
             }
             return result;        
         }
 
-        public bool DeleteByMWGName(string? cohortName)
+        public bool DeleteByMWGName(string? MWGName)
         {
-            bool result=false;
-            CohortModel foundCohort=GetCohortByCohortName(cohortName);
-            if(foundCohort != null)
+            bool result = false;
+            MWGModel foundMWG = GetMWGByMWGName(MWGName);
+            if(foundMWG != null)
             {
-                foundCohort.IsDeleted=!foundCohort.IsDeleted;
-                _context.Update<CohortModel>(foundCohort);
+                foundMWG.IsDeleted =!foundMWG.IsDeleted;
+                _context.Update<MWGModel>(foundMWG);
                 result = _context.SaveChanges()!=0;
             }
             return result;
         }
 
-        public bool DeleteByCohortId(int cohortId)
+        public bool DeleteByMWGId(int MWGId)
         {
-            bool result=false;
-            CohortModel foundCohort=GetCohortById(cohortId);
-            if(foundCohort != null)
+            bool result = false;
+            MWGModel foundMWG = GetMWGByMWGName(MWGName);
+            if(foundMWG != null)
             {
-                foundCohort.IsDeleted=!foundCohort.IsDeleted;
-                _context.Update<CohortModel>(foundCohort);
+                foundMWG.IsDeleted =!foundMWG.IsDeleted;
+                _context.Update<MWGModel>(foundMWG);
                 result = _context.SaveChanges()!=0;
             }
             return result;
