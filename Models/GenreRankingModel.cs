@@ -2,7 +2,7 @@ namespace pickflicksbackend.Models
 {
     public class GenreRankingModel
     {
-        public int GenreModelId { get; set; }
+        public int Id { get; set; }
         public int MWGId { get; set; }
         public int UserId { get; set; }        
         public int Biography { get; set; }

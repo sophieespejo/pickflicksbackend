@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using GetShitDoneBackend.Models;
-using GetShitDoneBackend.Services;
+using pickflicksbackend.Models;
+using pickflicksbackend.Services;
 
 namespace GetShitDoneBackend.Controllers
 {
@@ -18,84 +18,82 @@ namespace GetShitDoneBackend.Controllers
             _data = dataFromService;
         }
 
-
-
-        // Add a new MWG to table
+        // Create a MWG by MWGModel (will return a bool)
         [HttpPost("AddMWG")]
         public bool AddMWG(MWGModel newMWG)
         {
             return _data.AddMWG(newMWG);
         }
 
-        // Get all MWGModels from table
+        // Get all MWGs from table (will return a collection)
         [HttpGet("GetAllMWG")]
         public IEnumerable<MWGModel> GetAllMWG()
         {
             return _data.GetAllMWG();
         }
 
-        // Get a MWG by MWGId
-        [HttpGet("GetMWGById/{Id}")]
+        // Get a MWG by the specific id (will return MWGModel)
+        [HttpGet("GetMWGById/{id}")]
         public MWGModel GetMWGById(int id)
         {
             return _data.GetMWGById(id);
         }
 
-        // Get a LIST of MWG by UserId
-        [HttpGet("GetMWGByUserId/{UserId}")]
-        public IEnumerable<MWGModel> GetMWGByUserId(int userId)
+        // Get a MWG by the MWGName (will return MWGModel)
+        [HttpGet("GetMWGByMWGName/{WGName}")]
+        public MWGModel GetMWGByMWGName(string MWGName)
         {
-            return _data.GetMWGByUserId(userId);
+            return _data.GetMWGByMWGName(MWGName);
         }
 
-        // Get a MWG by the GroupName 
-        [HttpGet("GetMWGByGroupName/{GroupName}")]
-        public MWGModel GetMWGByGroupName(string groupName)
+        // Get all the MWGs a user created by userId (will return a collection of MWGModels)
+        [HttpGet("GetAllCreatedMWGByUserId/{userId}")]
+        public IEnumerable<MWGModel> GetAllCreatedMWGByUserId(int userId)
         {
-            return _data.GetMWGByGroupName(groupName);
+            return _data.GetAllCreatedMWGByUserId(userId);
         }
 
-        // Get a MWG by the GroupCreatorId 
-        [HttpGet("GetMWGByGroupCreatorId/{GroupCreaterId}")]
-        public MWGModel GetMWGByGroupCreatorId(string groupCreaterId)
+        // Get all the MWGs a user is a member of by userId (will return a collection of MWGModels)
+        [HttpGet("GetAllMWGAUserIsMemberOf/{userId}")]
+        public IEnumerable<MWGModel> GetAllMWGAUserIsMemberOf(int userId)
         {
-            return _data.GetMWGByGroupName(groupCreaterId);
+            return _data.GetAllMWGAUserIsMemberOf(userId);
         }
 
-        // Get all membersId of MWG by MWGId
-        [HttpGet("GetMembersIdOfMWG/{MWGId}")]
-        public MWGModel GetMembersIdOfMWG(string MWGId)
+        // Edit a MWG name (will return a bool)
+        [HttpPost("EditMWGName/{oldMWGName}/{updatedMWGName}")]
+        public bool EditMWGName(string? oldMWGName, string? updatedMWGName)
         {
-            return _data.GetMembersIdOfMWG(MWGId);
-        }
-
-        // Get SuggestedMovies by MWGId
-        [HttpGet("GetSuggestedMoviesByMWGId/{MWGId}")]
-        public MWGModel GetSuggestedMoviesByMWGId(string MWGId)
-        {
-            return _data.GetSuggestedMoviesByMWGId(MWGId);
+            return _data.EditMWGName(oldMWGName, updatedMWGName);
         }
 
 
-        // Get all soft deleted ProjectItems 
-        [HttpGet("GetDeletedProjectItems")]
-        public IEnumerable<MWGModel> GetDeletedMWG()
+        // Add a members to MWG only the GrouoCreator can do this (will return a bool)
+        [HttpPost("AddMemberToMWG/{MWGId}/{newMemberId}")]
+        public bool AddMemberToMWG(int MWGId, string? newMemberId)
         {
-            return _data.GetDeletedMWG();
+            return _data.AddMemberToMWG(MWGId, newMemberId);
         }
 
-        // Update MWG
-        [HttpPost("UpdateMWG")]
-        public bool UpdateMWG(MWGModel updatedMWG)
+        // Add a user suggested movie to a MWG (will return a bool)
+        [HttpPost("AddUserSuggestedMovies/{MWGId}/{newMovie}")]
+        public bool AddUserSuggestedMovies(int MWGId, string? newMovie)
         {
-            return _data.UpdateMWG(updatedMWG);
+            return _data.AddUserSuggestedMovies(MWGId, newMovie);
         }
 
-        // Soft delete a MWG
-        [HttpPost("DeleteMWG")]
-         public bool DeleteMWG(MWGModel deletedMWG)
+        // Delete a MWG by MWGName (will return a bool)
+        [HttpPost("DeleteByMWGName/{MWGName}")]
+        public bool DeleteByMWGName(string? MWGName)
         {
-           return _data.DeleteMWG(deletedMWG);
+            return _data.DeleteByMWGName(MWGName);
+        }
+
+        // Delete a MWG by id of MWG (will return a bool)
+        [HttpPost("DeleteByMWGId/{MWGId}")]
+        public bool DeleteByMWGId(int MWGId)
+        {
+            return _data.DeleteByMWGId(MWGId);
         }
     }
 }

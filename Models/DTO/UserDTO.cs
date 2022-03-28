@@ -1,8 +1,8 @@
 namespace pickflicksbackend.Models.DTO
 {
-    public class UserIdDTO
+    public class UserDTO
     {
-        public int UserId { get; set; }
+        public int Id { get; set; }
         public string? Username { get; set; }
     }
 }

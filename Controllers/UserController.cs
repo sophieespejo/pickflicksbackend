@@ -19,41 +19,46 @@ namespace pickflicksbackend.Controllers
             _data = dataFromService;
         }
 
-        [HttpGet("UserByUsername/{username}")]
-        public UserIdDTO GetUserByUsername(string username)
-        {
-            return _data.GetUserIdDTOByUsername(username);
-        }
-
+        // Add a user with a CreateAccuntDTO (will return bool)
         [HttpPost("AddUser")]
-        public bool AddUser(CreateAccountDTO UserToAdd) {
-            return _data.AddUser(UserToAdd);
+          public bool AddUser(CreateAccountDTO userToAdd)
+        {
+            return _data.AddUser(userToAdd);
         }
 
+        // User login with LoginDTO (will return token)
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] LoginDTO user)
+        {
+            return _data.Login(user);
+        } 
+
+        // Get a list of all users by UserDTO (will return a list)
         [HttpGet("GetAllUsers")]
-        public IEnumerable<UserModel> GetAllUsers() 
+        public List<UserDTO> GetAllUsers()
         {
             return _data.GetAllUsers();
         }
 
-        [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginDTO User)
+        // Soft delete (will return bool)
+        [HttpPost("DeleteUser/{username}")]
+        public bool DeleteUser(string? username)
         {
-            return _data.Login(User);
+            return _data.DeleteUser(username);
         }
 
-        //Update User Account
-        [HttpPost("UpdateUser/{username}")]
-        public bool UpdateUser(string username)
+        // Get a user's UserDTO by their string username (will return UserDTO)
+        [HttpGet("GetUserByUsername/{username}")]
+        public UserDTO GetUserByUsername(string? username)
         {
-            return _data.UpdateUsername(username);
+            return _data.GetUserByUsername(username);
         }
 
-        //Delete User Account
-        [HttpPost("DeleteUser/{userToDelete}")]
-        public bool DeleteUser(string? userToDelete)
+        // Get a user's UserDTO by their int id (will return UserDTO)
+        [HttpGet("GetUserById/{id}")]
+        public UserDTO GetUserById(string? id)
         {
-            return _data.DeleteUser(userToDelete);
+            return _data.GetUserById(id);
         }
     }
 }

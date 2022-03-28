@@ -7,6 +7,7 @@ namespace pickflicksbackend.Models.DTO
 {
     public class PasswordDTO
     {
-        // Empty for some reason
+        public string? Salt  { get; set; }
+        public string? Hash { get; set; }
     }
 }
