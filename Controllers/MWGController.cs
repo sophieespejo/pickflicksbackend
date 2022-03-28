@@ -70,7 +70,7 @@ namespace GetShitDoneBackend.Controllers
 
         // Add a members to MWG only the GrouoCreator can do this (will return a bool)
         [HttpPost("AddMemberToMWG/{MWGId}/{newMemberId}")]
-        public bool AddMemberToMWG(int MWGId, string? newMemberId)
+        public bool AddMemberToMWG(int MWGId, int newMemberId)
         {
             return _data.AddMemberToMWG(MWGId, newMemberId);
         }

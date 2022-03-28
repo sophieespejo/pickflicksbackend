@@ -40,13 +40,6 @@ namespace pickflicksbackend.Controllers
             return _data.GetAllUsers();
         }
 
-        // Soft delete (will return bool)
-        [HttpPost("DeleteUser/{username}")]
-        public bool DeleteUser(string? username)
-        {
-            return _data.DeleteUser(username);
-        }
-
         // Get a user's UserDTO by their string username (will return UserDTO)
         [HttpGet("GetUserByUsername/{username}")]
         public UserDTO GetUserByUsername(string? username)
@@ -59,6 +52,13 @@ namespace pickflicksbackend.Controllers
         public UserDTO GetUserById(string? id)
         {
             return _data.GetUserById(id);
+        }
+
+        // Soft delete (will return bool)
+        [HttpPost("DeleteUser/{username}")]
+        public bool DeleteUser(string? username)
+        {
+            return _data.DeleteUser(username);
         }
     }
 }

@@ -23,52 +23,68 @@ namespace pickflicksbackend.Services
             _context = context;
         }
 
-        public IEnumerable<UserModel> GetAllUsers()
+        public bool DoesUserExists(string? username)
         {
-            return _context.UserInfo;
+            return _context.UserInfo.SingleOrDefault(user => user.Username == username) != null;
         }
 
-        public bool DoesUserExist(string? username) 
+        public PasswordDTO HashPassword(string? password)
         {
-            // Check the table to see if username exists
-            // Single or default
-            // If one item matches our condition that item will be returned
-            // If no items match the condition a null will be returned
-            // If multiple items match the condition an error will occur >>
-            // UserModel foundUser = _context.UserInfo.SingleOrDefault( user => user.Username == username);
-            // if (foundUser != null ) {
-            //     // The user does exist
-            // } else {
-            //     // The user does not exist
-            // }
-            
-            return _context.UserInfo.SingleOrDefault( user => user.Username == username) != null;
+            PasswordDTO newHashedPassword = new PasswordDTO();
+            byte[] SaltBytes = new byte[64];
+            var provider = RandomNumberGenerator.Create();
+            provider.GetNonZeroBytes(SaltBytes);
+            var Salt = Convert.ToBase64String(SaltBytes);
+            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, SaltBytes, 10000);
+            var HashPassword = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
+            newHashedPassword.Salt = Salt;
+            newHashedPassword.Hash = HashPassword;
+            return newHashedPassword;
         }
 
-        public UserModel GetUserByUsername(string username)
+        public bool AddUser(CreateAccountDTO userToAdd)
         {
-            return _context.UserInfo.SingleOrDefault( user => user.Username == username);
+            bool result = false;
+            if (!DoesUserExists(userToAdd.username))
+            {
+                UserModel newUser = new UserModel();
+                newUser.Id = 0;
+                newUser.Username = userToAdd.Username;
+                newUser.Icon = userToAdd.Icon;
+                newUser.MyMWGId = userToAdd.MyMWGId;
+                newUser.ListOfMWGId = userToAdd.ListOfMWGId;
+                newUser.FavoritedMWGId = userToAdd.FavoritedMWGId;
+
+                var hashedPassword = HashPassword(userToAdd.Password);
+                newUser.Salt = hashedPassword.Salt;
+                newUser.Hash = hashedPassword.Hash;
+                
+                _context.Add(newUser);
+
+                result = _context.SaveChanges() != 0;
+            }
+            return result;
         }
 
-        public UserIdDTO GetUserIdDTOByUsername(string username)
+        public bool VerifyUserPassword(string? password, string? storedHash, string? storedSalt)
         {
-            var UserInfo = new UserIdDTO();
-            var foundUser = _context.UserInfo.SingleOrDefault( user => user.Username == username);
-            UserInfo.UserId = foundUser.Id;
-            UserInfo.Username = foundUser.Username;
-            return UserInfo;
+            var SaltBytes = Convert.FromBase64String(StoredSalt);
+            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(Password, SaltBytes, 10000);
+            var newHash = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
+            return newHash == StoredHash;
         }
 
-        public IActionResult Login(LoginDTO user)
+
+        public IActionResult Login([FromBody] LoginDTO user)
         {
             IActionResult Result = Unauthorized();
-            // Check to see if the user exist
-            if (DoesUserExist(user.Username)) {
-                // true
-                var foundUser = GetUserByUsername(user.Username);
-                // Check to see if the password is correct
-                if (VerifyUserPassword(user.Password, foundUser.Hash, foundUser.Salt)) {
-                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DayClassSuperDuperSecretKey@209"));
+            if (DoesUserExists(user.Username))
+            {
+                var foundUser = FindUserByUsername(user.Username);
+                var verifyPass = VerifyUserPassword(user.Password, foundUser.Hash, foundUser.Salt);
+                if (verifyPass)
+                {
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ILoveToSolveKatasAllDay@209"));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
                     var tokeOptions = new JwtSecurityToken(
                         issuer: "http://localhost:5000",
@@ -76,93 +92,74 @@ namespace pickflicksbackend.Services
                         claims: new List<Claim>(),
                         expires: DateTime.Now.AddMinutes(30),
                         signingCredentials: signinCredentials
-            );
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-            return Ok(new { Token = tokenString });
-                } 
+                    );
+                    
+                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+                    Result = Ok(new { Token = tokenString });
+                    
+                }
             }
             return Result;
         }
 
-        public bool AddUser(CreateAccountDTO UserToAdd) 
+        public UserDTO GetUserByUsername(string? username)
         {
-            bool result = false;
-            if (!DoesUserExist(UserToAdd.Username)) {
-                // The user does exist
-                UserModel newUser = new UserModel();
-                var hashedPassword = HashPassword(UserToAdd.Password);
-                newUser.Id = UserToAdd.Id;
-                newUser.Username = UserToAdd.Username;
-                newUser.Salt = hashedPassword.Salt;
-                newUser.Hash = hashedPassword.Hash;
+            var dtoInfo = new UserDTO();
+            var foundUser = _context.UserInfo.SingleOrDefault(user => user.Username == username);
+            dtoInfo.Id = foundUser.Id;
+            dtoInfo.Username = foundUser.Username;
+            dtoInfo.Icon = foundUser.Icon;
+            dtoInfo.MyMWGId = foundUser.MyMWGId;
+            dtoInfo.ListOfMWGId = foundUser.ListOfMWGId;
+            dtoInfo.FavoritedMWGId = foundUser.FavoritedMWGId;
 
-                _context.Add(newUser);
-                
-                result = _context.SaveChanges() != 0;
-            }
-            return result;
+            return dtoInfo;
         }
 
-        public PasswordDTO HashPassword(string? password) 
+        public UserDTO GetUserById(int id)
         {
-            PasswordDTO newHashedPassword = new PasswordDTO();
-            byte[] SaltBytes = new byte[64];
-            var provider = new RNGCryptoServiceProvider();
-            provider.GetNonZeroBytes(SaltBytes);
-            var Salt = Convert.ToBase64String(SaltBytes);
-            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, SaltBytes, 10000);
-            var Hash = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
-            newHashedPassword.Salt = Salt;
-            newHashedPassword.Hash = Hash;
+            var dtoInfo = new UserDTO();
+            var foundUser = _context.UserInfo.SingleOrDefault(user => user.Id == id);
+            dtoInfo.Id = foundUser.Id;
+            dtoInfo.Username = foundUser.Username;
+            dtoInfo.Icon = foundUser.Icon;
+            dtoInfo.MyMWGId = foundUser.MyMWGId;
+            dtoInfo.ListOfMWGId = foundUser.ListOfMWGId;
+            dtoInfo.FavoritedMWGId = foundUser.FavoritedMWGId;
 
-            return newHashedPassword;
+            return dtoInfo;
         }
 
-        public bool VerifyUserPassword(string? Password, string? storedHash, string? storedSalt)
+        public List<UserDTO> GetAllUsers()
         {
-            var SaltBytes = Convert.FromBase64String(storedSalt);
-            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(Password, SaltBytes, 10000);
-            var newHash = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
-            return newHash == storedHash;
-        }
-        
-        public bool UpdateUser(UserModel userToUpdate)
-        {
-            //This one is sednig over the whole object to be updated
-            _context.Update<UserModel>(userToUpdate);
-            return _context.SaveChanges() !=0; 
-        }
-
-        public bool UpdateUsername(string Username)
-        {
-            //This one is sednig over just the username.
-            //Then you have to get the object to then be updated.
-            UserModel foundUser = GetUserByUsername(Username);
-            bool result = false;
-            if(foundUser != null)
+            List<UserModel> AllUser = new List<UserModel>();
+            AllUser= _context.UserInfo.ToList();
+            List<UserDTO>PublicDataAllUser = new List<UserDTO>();
+            foreach (UserModel User in AllUser)
             {
-                //A user was foundUser
-                foundUser.Username = Username;
+                UserDTO PublicUserInfo = GetUserByUsername(user.Username);
+                PublicDataAllUser.Add(PublicUserInfo);
+            }
+            return PublicDataAllUser;
+        }
+
+        public bool DeleteUser(string? username)
+        {
+            UserModel foundUser = FindUserByUsername(username);
+            bool result=false;
+            if(foundUser!=null)
+            {
+                foundUser.IsDeleted=true;
                 _context.Update<UserModel>(foundUser);
-               result =  _context.SaveChanges() != 0;
+                result = _context.SaveChanges()!=0;
             }
             return result;
         }
 
-        public bool DeleteUser(string Username)
+        // Only use this for backend, NEVER PASS DATA TO FRONTEND 
+        public UserModel FindUserByUsername(string ?username)
         {
-            //This one is sednig over just the username.
-            //Then you have to get the object to then be updated.
-            UserModel foundUser = GetUserByUsername(Username);
-            bool result = false;
-            if(foundUser != null)
-            {
-                //A user was foundUser
-                foundUser.Username = Username;
-                _context.Remove<UserModel>(foundUser);
-               result =  _context.SaveChanges() != 0;
-            }
-            return result;
+            return _context.UserInfo.SingleOrDefault(item => item.Username == username);
         }
     }
 }
