@@ -49,7 +49,7 @@ namespace pickflicksbackend.Controllers
 
         // Get a user's UserDTO by their int id (will return UserDTO)
         [HttpGet("GetUserById/{id}")]
-        public UserDTO GetUserById(string? id)
+        public UserDTO GetUserById(int id)
         {
             return _data.GetUserById(id);
         }

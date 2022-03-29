@@ -6,15 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using pickflicksbackend.Models;
 using pickflicksbackend.Services;
 
-namespace GetShitDoneBackend.Controllers
+namespace pickflicksbackend.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProjectItemController : ControllerBase
+    public class MWGController : ControllerBase
     {
-        private readonly ProjectItemService _data;
+        private readonly MWGService _data;
 
-        public ProjectItemController(ProjectItemService dataFromService) {
+        public MWGController(MWGService dataFromService) {
             _data = dataFromService;
         }
 
@@ -41,7 +41,7 @@ namespace GetShitDoneBackend.Controllers
 
         // Get a MWG by the MWGName (will return MWGModel)
         [HttpGet("GetMWGByMWGName/{WGName}")]
-        public MWGModel GetMWGByMWGName(string MWGName)
+        public MWGModel GetMWGByMWGName(string? MWGName)
         {
             return _data.GetMWGByMWGName(MWGName);
         }

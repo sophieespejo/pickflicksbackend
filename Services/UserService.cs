@@ -157,7 +157,7 @@ namespace pickflicksbackend.Services
         }
 
         // Only use this for backend, NEVER PASS DATA TO FRONTEND 
-        public UserModel FindUserByUsername(string ?username)
+        public UserModel FindUserByUsername(string? username)
         {
             return _context.UserInfo.SingleOrDefault(item => item.Username == username);
         }
