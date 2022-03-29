@@ -12,7 +12,7 @@ namespace pickflicksbackend.Services
     public class MWGService
     {
         private readonly DataContext _context;
-        public CohortService(DataContext context)
+        public MWGService(DataContext context)
         {
             _context = context;
         }
